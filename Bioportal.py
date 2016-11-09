@@ -34,7 +34,8 @@ class Bioportal(object):
     def annotator(self, text, only_terms_names=False, **kwargs):
 
         '''If the 'only_terms_names' argument is true, return only a set of
-        the terms annotated. If the term found is a synonym, it will return  '''
+        the terms annotated. If the term is a synonym the preferred name will be
+        added to the set, not the synonym.'''
 
         # http://data.bioontology.org/documentation#nav_annotator
 
@@ -86,6 +87,17 @@ class Bioportal(object):
 
         for annotated_class in complete_annotations:
             for annotation in annotated_class['annotations']:
-                all_terms.append(annotation['text'])
+                match_type = annotation['matchType']
+
+                if match_type == u'PREF':
+                    preferred_term_name = annotation['text']
+                # Go get the preferred name for this term.
+                elif match_type == u'SYN':
+                    class_url = annotated_class['annotatedClass']['links']['self']
+                    payload = {'apikey': self.apikey}
+                    class_info_dict = requests.get(class_url, payload).json()
+                    preferred_term_name = class_info_dict['prefLabel']
+
+                all_terms.append(preferred_term_name)
 
         return set(all_terms)
