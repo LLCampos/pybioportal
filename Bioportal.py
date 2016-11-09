@@ -1,6 +1,3 @@
-#!/usr/bin/python
-# -*- coding: utf8 -*-
-
 import json
 import requests
 from requests import HTTPError
@@ -35,7 +32,7 @@ class Bioportal(object):
 
         return self._bioportal_api_request(full_url, payload)
 
-    def annotator(self, text, only_terms_names=False, **kwargs):
+    def annotator(self, text, **kwargs):
 
         '''If the 'only_terms_names' argument is true, return only a set of
         the terms annotated. If the term found is a synonym, it will return  '''
@@ -51,10 +48,7 @@ class Bioportal(object):
 
         complete_annotations = self._bioportal_api_request(full_url, payload)
 
-        if only_terms_names:
-            return self._extract_terms_names_from_annotations(complete_annotations)
-        else:
-            return complete_annotations
+        return complete_annotations
 
     def recommender(self, text_or_keywords, **kwargs):
 
@@ -84,12 +78,3 @@ class Bioportal(object):
             raise HTTPError(joint_error_messages)
 
         return json_response
-
-    def _extract_terms_names_from_annotations(self, complete_annotations):
-        all_terms = []
-
-        for annotated_class in complete_annotations:
-            for annotation in annotated_class['annotations']:
-                all_terms.append(annotation['text'])
-
-        return set(all_terms)
