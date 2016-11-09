@@ -1,6 +1,6 @@
-import json
 import requests
 from requests import HTTPError
+from keys import BIOPORTAL_API_KEY
 
 
 class Bioportal(object):
@@ -11,13 +11,12 @@ class Bioportal(object):
     BASE_URL = 'http://data.bioontology.org'
 
     def __init__(self):
-
-        # There should be a file named "bioportal.json" in the root of the
-        # project. It should have the following structure:
-        # {"api_key": "YOUR API KEY"}
-        # You can get the API Key by signing up at BioPortal website.
-        with open("bioportal.json") as f:
-            self.apikey = json.load(f)["api_key"]
+        # You can get the API Key by signing up at BioPortal website. You
+        # should had your key to the keys.py file.
+        if not BIOPORTAL_API_KEY:
+            raise Exception('You probably forgot to add your API Key to the '
+                            'code.')
+        self.apikey = BIOPORTAL_API_KEY
 
     def classes(self, search_query, **kwargs):
 
