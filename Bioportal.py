@@ -98,6 +98,6 @@ class Bioportal(object):
                     class_info_dict = requests.get(class_url, payload).json()
                     preferred_term_name = class_info_dict['prefLabel']
 
-                all_terms.append(preferred_term_name)
+                all_terms.append(preferred_term_name.lower())
 
         return set(all_terms)
