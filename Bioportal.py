@@ -33,9 +33,6 @@ class Bioportal(object):
 
     def annotator(self, text, **kwargs):
 
-        '''If the 'only_terms_names' argument is true, return only a set of
-        the terms annotated. If the term found is a synonym, it will return  '''
-
         # http://data.bioontology.org/documentation#nav_annotator
 
         endpoint = '/annotator'
