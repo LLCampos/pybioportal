@@ -31,11 +31,13 @@ class Bioportal(object):
 
         return self._bioportal_api_request(full_url, payload)
 
-    def annotator(self, text, only_terms_names=False, **kwargs):
+    def annotator(self, text, only_terms_names=False,
+                  show_synonyms_names=False, **kwargs):
 
         '''If the 'only_terms_names' argument is true, return only a set of
-        the terms annotated. If the term is a synonym the preferred name will be
-        added to the set, not the synonym.'''
+        the terms annotated. If show_synonyms_names is false, if the term is a
+        synonym, the preferred name will be added to the set, not the synonym.
+        '''
 
         # http://data.bioontology.org/documentation#nav_annotator
 
@@ -49,7 +51,8 @@ class Bioportal(object):
         complete_annotations = self._bioportal_api_request(full_url, payload)
 
         if only_terms_names:
-            return self._extract_terms_names_from_annotations(complete_annotations)
+            return self._extract_terms_names_from_annotations(complete_annotations,
+                                                              show_synonyms_names)
         else:
             return complete_annotations
 
@@ -82,7 +85,8 @@ class Bioportal(object):
 
         return json_response
 
-    def _extract_terms_names_from_annotations(self, complete_annotations):
+    def _extract_terms_names_from_annotations(self, complete_annotations,
+                                              show_synonyms_names):
         all_terms = []
 
         for annotated_class in complete_annotations:
@@ -93,10 +97,13 @@ class Bioportal(object):
                     preferred_term_name = annotation['text']
                 # Go get the preferred name for this term.
                 elif match_type == u'SYN':
-                    class_url = annotated_class['annotatedClass']['links']['self']
-                    payload = {'apikey': self.apikey}
-                    class_info_dict = requests.get(class_url, payload).json()
-                    preferred_term_name = class_info_dict['prefLabel']
+                    if show_synonyms_names:
+                        preferred_term_name = annotation['text']
+                    else:
+                        class_url = annotated_class['annotatedClass']['links']['self']
+                        payload = {'apikey': self.apikey}
+                        class_info_dict = requests.get(class_url, payload).json()
+                        preferred_term_name = class_info_dict['prefLabel']
 
                 all_terms.append(preferred_term_name.lower())
 
