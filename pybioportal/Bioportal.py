@@ -1,6 +1,5 @@
 import requests
 from requests import HTTPError
-from keys import BIOPORTAL_API_KEY
 
 
 class Bioportal(object):
@@ -10,13 +9,8 @@ class Bioportal(object):
 
     BASE_URL = 'http://data.bioontology.org'
 
-    def __init__(self):
-        # You can get the API Key by signing up at BioPortal website. You
-        # should had your key to the keys.py file.
-        if not BIOPORTAL_API_KEY:
-            raise Exception('You probably forgot to add your API Key to the '
-                            'code.')
-        self.apikey = BIOPORTAL_API_KEY
+    def __init__(self, api_key):
+        self.apikey = api_key
 
     def classes(self, search_query, **kwargs):
 
