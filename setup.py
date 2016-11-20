@@ -1,26 +1,17 @@
-from setuptools import setup, find_packages
-import sys, os
+try:
+    from setuptools import setup
+except ImportError:
+    from distutils.core import setup
 
-version = '0.1'
-
-setup(name='pybioportal/',
-      version=version,
-      description="''",
-      long_description="""\
-''""",
-      classifiers=[], # Get strings from http://pypi.python.org/pypi?%3Aaction=list_classifiers
-      keywords="''",
-      author='Lu\xc3\xads Campos',
-      author_email='luis1212@sapo.pt',
-      url='',
-      license='',
-      packages=find_packages(exclude=['ez_setup', 'examples', 'tests']),
-      include_package_data=True,
-      zip_safe=False,
-      install_requires=[
-          # -*- Extra requirements: -*-
-      ],
-      entry_points="""
-      # -*- Entry points: -*-
-      """,
-      )
+setup(
+    name='pybioportal',
+    version='0.1',
+    description="A Python binding of the BioPortal REST API.",
+    author='Lu\xc3\xads Campos',
+    author_email='luis.filipe.lcampos@gmail.com',
+    url='https://github.com/LLCampos/pybioportal',
+    license='',
+    install_requires=[
+        'requests'
+    ],
+)
