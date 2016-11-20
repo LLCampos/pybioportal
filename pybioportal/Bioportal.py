@@ -73,9 +73,13 @@ class Bioportal(object):
             # unsuccessful status code.
             r.raise_for_status()
         except HTTPError:
-            error_messages = json_response['errors']
-            joint_error_messages = '\n'.join(error_messages)
-            raise HTTPError(joint_error_messages)
+            if 'errors' in json_response.keys():
+                error_messages = json_response['errors']
+                error_message = '\n'.join(error_messages)
+            elif 'error' in json_response.keys():
+                error_message = json_response['error']
+
+            raise HTTPError(error_message)
 
         return json_response
 
