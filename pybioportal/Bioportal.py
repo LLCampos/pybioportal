@@ -71,8 +71,9 @@ class Bioportal(object):
     def _bioportal_api_request(self, url, payload={}):
 
         payload['apikey'] = self.apikey
+        processed_payload = self._process_payload(payload)
 
-        r = requests.get(url, params=payload)
+        r = requests.get(url, params=processed_payload)
         json_response = r.json()
 
         try:
@@ -89,3 +90,15 @@ class Bioportal(object):
             raise HTTPError(error_message)
 
         return json_response
+
+    def _process_payload(self, payload):
+        '''Turn boolean True to str 'true' and False to str 'false'. Otherwise,
+        server will ignore argument with boolean value.'''
+
+        def process_value(value):
+            if type(value) is bool:
+                return str(value).lower()
+            else:
+                return value
+
+        return {key: process_value(value) for key, value in payload.iteritems()}
