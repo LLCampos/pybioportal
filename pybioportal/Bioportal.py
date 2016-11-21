@@ -3,7 +3,6 @@ import urllib
 from requests import HTTPError
 
 
-
 class Bioportal(object):
 
     '''A Python binding of the BioPortal REST API
@@ -23,7 +22,6 @@ class Bioportal(object):
 
         payload = kwargs
         payload['q'] = search_query
-        payload['apikey'] = self.apikey
 
         return self._bioportal_api_request(full_url, payload)
 
@@ -42,7 +40,6 @@ class Bioportal(object):
 
         payload = kwargs
         payload['text'] = text
-        payload['apikey'] = self.apikey
 
         complete_annotations = self._bioportal_api_request(full_url, payload)
 
@@ -61,7 +58,6 @@ class Bioportal(object):
 
         payload = kwargs
         payload['input'] = text_or_keywords
-        payload['apikey'] = self.apikey
 
         return self._bioportal_api_request(full_url, payload)
 
@@ -80,11 +76,11 @@ class Bioportal(object):
         endpoint = '/ontologies/{}/classes/{}'.format(ontology, escaped_cls_id)
         full_url = Bioportal.BASE_URL + endpoint
 
-        payload = {'apikey': self.apikey}
+        return self._bioportal_api_request(full_url)
 
-        return self._bioportal_api_request(full_url, payload)
+    def _bioportal_api_request(self, url, payload={}):
 
-    def _bioportal_api_request(self, url, payload):
+        payload['apikey'] = self.apikey
 
         r = requests.get(url, params=payload)
         json_response = r.json()
