@@ -1,5 +1,7 @@
 import requests
+import urllib
 from requests import HTTPError
+
 
 
 class Bioportal(object):
@@ -50,6 +52,25 @@ class Bioportal(object):
         payload = kwargs
         payload['input'] = text_or_keywords
         payload['apikey'] = self.apikey
+
+        return self._bioportal_api_request(full_url, payload)
+
+    def ontology_class(self, ontology, cls_id):
+        '''
+        Just supports the /ontologies/:ontology/classes/:cls endpoint, which
+        returns information about one class
+
+        ontology: name of the ontology
+        cls_id: @id of the class. Ex: http://www.radlex.org/RID/#RID43314
+        '''
+
+        # http://data.bioontology.org/documentation#Class
+
+        escaped_cls_id = urllib.quote(cls_id, safe='')
+        endpoint = '/ontologies/{}/classes/{}'.format(ontology, escaped_cls_id)
+        full_url = Bioportal.BASE_URL + endpoint
+
+        payload = {'apikey': self.apikey}
 
         return self._bioportal_api_request(full_url, payload)
 
