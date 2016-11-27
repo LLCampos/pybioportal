@@ -119,7 +119,10 @@ class Bioportal(object):
                         class_url = annotated_class['annotatedClass']['links']['self']
                         payload = {'apikey': self.apikey}
                         class_info_dict = requests.get(class_url, payload).json()
-                        preferred_term_name = class_info_dict['prefLabel']
+                        try:
+                            preferred_term_name = class_info_dict['prefLabel']
+                        except KeyError:
+                            raise KeyError("Key error for term \"{}\"".format(annotation['text']))
 
                 all_terms.append(preferred_term_name.lower())
 
