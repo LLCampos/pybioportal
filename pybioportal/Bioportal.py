@@ -106,6 +106,11 @@ class Bioportal(object):
         all_terms = []
 
         for annotated_class in complete_annotations:
+
+            # Hack while bug on BioPortal is not fixed
+            if 'owl-ontologies' in annotated_class['annotatedClass']['@id']:
+                continue
+
             for annotation in annotated_class['annotations']:
                 match_type = annotation['matchType']
 
