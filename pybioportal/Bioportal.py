@@ -25,15 +25,33 @@ class Bioportal(object):
 
         return self._bioportal_api_request(full_url, payload)
 
-    def annotator(self, text, only_terms_names=False,
+    def annotator(self, text, output_type='bioportal',
                   show_synonyms_names=False, **kwargs):
 
-        '''If the 'only_terms_names' argument is true, return only a set of
-        the terms annotated. If show_synonyms_names is false, if the term is a
+        """
+
+        output_type argument define how the output is formatted. possible
+        values:
+
+        bioportal (default) -- return a list of annotations returned by
+                               BioPortal API.
+        only_terms_names    -- return only a set of the terms annotated
+        brat                -- returns the result in the brat standoff format
+                               (http://brat.nlplab.org/standoff.html) as list
+                               where each member corresponds to a line in the
+                               annotation file.
+
+
+        If show_synonyms_names is false, if the term is a
         synonym, the preferred name will be added to the set, not the synonym.
-        '''
+        """
 
         # http://data.bioontology.org/documentation#nav_annotator
+
+        output_types = ['bioportal', 'only_terms_names', 'brat']
+        if output_type not in output_types:
+            raise Exception('The output_type you sent as argument is not one of'
+                            'the allowed output_types values')
 
         endpoint = '/annotator'
         full_url = Bioportal.BASE_URL + endpoint
@@ -43,11 +61,13 @@ class Bioportal(object):
 
         complete_annotations = self._bioportal_api_request(full_url, payload)
 
-        if only_terms_names:
+        if output_type == 'bioportal':
+            return complete_annotations
+        elif output_type == 'only_terms_names':
             return self._extract_terms_names_from_annotations(complete_annotations,
                                                               show_synonyms_names)
-        else:
-            return complete_annotations
+        elif output_type == 'brat':
+            return Bioportal._convert_to_brat_format(complete_annotations, text)
 
     def recommender(self, text_or_keywords, **kwargs):
 
@@ -144,3 +164,44 @@ class Bioportal(object):
                 return value
 
         return {key: process_value(value) for key, value in payload.iteritems()}
+
+    @staticmethod
+    def _convert_to_brat_format(bioportal_annotations, text):
+        """Receive a list of BioPortal annotations as the ones returning from
+        their API and returns a list the annotations in the brat standoff format
+        (http://brat.nlplab.org/standoff.html), where each member of the list
+        corresponds to one line of the annotation file.
+        """
+
+        brat_annotations = []
+
+        next_entity_id = 1
+        for annotated_class in bioportal_annotations:
+
+            # Hack while bug on BioPortal is not fixed
+            if 'owl-ontologies' in annotated_class['annotatedClass']['@id']:
+                continue
+
+            annot_type = annotated_class['annotatedClass']['links']['ontology'].split('/')[-1]
+
+            for annotation in annotated_class['annotations']:
+                annot_id = 'T{}'.format(next_entity_id)
+                next_entity_id += 1
+
+                start_offset = annotation['from'] - 1
+                end_offset = annotation['to']
+                text_annotated = text[start_offset:end_offset]
+
+                annot_data = {
+                    'annot_id': annot_id,
+                    'annot_type': annot_type,
+                    'start_offset': start_offset,
+                    'end_offset': end_offset,
+                    'text_annotated': text_annotated
+                }
+
+                brat_annotations.append(
+                    '{annot_id}\t{annot_type} {start_offset} {end_offset}\t{text_annotated}'.format(**annot_data)
+                )
+
+        return brat_annotations
