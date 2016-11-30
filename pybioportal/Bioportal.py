@@ -104,6 +104,10 @@ class Bioportal(object):
         processed_payload = self._process_payload(payload)
 
         r = requests.get(url, params=processed_payload)
+
+        if r.status_code is 414:
+            raise HTTPError('Text is too long.')
+
         json_response = r.json()
 
         try:
