@@ -23,7 +23,7 @@ class Bioportal(object):
         payload = kwargs
         payload['q'] = search_query
 
-        return self._bioportal_api_request(full_url, payload)
+        return self._bioportal_api_request(full_url, 'post', payload)
 
     def annotator(self, text, output_type='bioportal',
                   show_synonyms_names=False, **kwargs):
@@ -59,7 +59,9 @@ class Bioportal(object):
         payload = kwargs
         payload['text'] = text
 
-        complete_annotations = self._bioportal_api_request(full_url, payload)
+        complete_annotations = self._bioportal_api_request(
+            full_url, 'post', payload
+        )
 
         if output_type == 'bioportal':
             return complete_annotations
@@ -79,7 +81,7 @@ class Bioportal(object):
         payload = kwargs
         payload['input'] = text_or_keywords
 
-        return self._bioportal_api_request(full_url, payload)
+        return self._bioportal_api_request(full_url, 'post', payload)
 
     def ontology_class(self, ontology, cls_id):
         '''
@@ -96,14 +98,17 @@ class Bioportal(object):
         endpoint = '/ontologies/{}/classes/{}'.format(ontology, escaped_cls_id)
         full_url = Bioportal.BASE_URL + endpoint
 
-        return self._bioportal_api_request(full_url)
+        return self._bioportal_api_request(full_url, 'get')
 
-    def _bioportal_api_request(self, url, payload={}):
+    def _bioportal_api_request(self, url, method, payload={}):
 
         payload['apikey'] = self.apikey
         processed_payload = self._process_payload(payload)
 
-        r = requests.get(url, params=processed_payload)
+        if method == 'get':
+            r = requests.get(url, params=processed_payload)
+        elif method == 'post':
+            r = requests.post(url, data=processed_payload)
 
         if r.status_code == 414:
             raise HTTPError('Text is too long.')
